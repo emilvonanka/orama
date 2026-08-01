@@ -1,13 +1,13 @@
 # Orama
 
-I built Orama to see if I could take a trading idea all the way from a data pipeline to a
-live-connected system, not just a backtest in a notebook. It is a single C++23 binary that reads
-1-minute NASDAQ-100 bars, builds features from them, runs those features through an XGBoost
-model, and sends bracket orders to Interactive Brokers' paper trading API. It also has a live
-dashboard built with ImGui and ImPlot so I can actually watch what it is doing while it runs.
+I built Orama to see if I could take a trading idea all the way to a live-connected system. It 
+is a single C++23 binary that reads 1-minute NASDAQ-100 bars, builds features from them, 
+runs those features through an XGBoost model, and sends bracket orders to Interactive Broker's 
+paper trading API. It also has a live dashboard built with ImGui and ImPlot so I can actually 
+watch what it is doing while it runs.
 
-> **Paper trading only.** This is a systems engineering project, not a pitch for a trading
-> strategy. See the [Disclaimer](#disclaimer) at the bottom.
+> **Paper trading only.** This is a systems engineering project, not a profitable trading
+> strategy.
 
 ---
 
@@ -73,13 +73,13 @@ flowchart TD
 
 | Path | Responsibility |
 |---|---|
-| `core/` | Entry point, logging, market types, TA-Lib wrapper, runtime config |
+| `core/` | Entry point, logging, market types, TA-Lib wrapper |
 | `core/broker/` | IBKR TWS API client, connection, subscriptions, order placement, callbacks |
 | `learner/` | Offline training, reads Databento DBN files, builds labelled feature vectors |
 | `model/` | XGBoost booster lifecycle, train, early stopping, save/load, predict |
 | `manager/` | Live orchestration, target selection, inference, risk limits, order state machine |
-| `user/` | Account abstraction, sizing, FX conversion, order helpers |
-| `interface/` | ImGui/ImPlot dashboard, reads a mutex-guarded snapshot of manager state |
+| `user/` | Account, sizing, FX conversion, order helpers |
+| `interface/` | ImGui/ImPlot dashboard |
 
 ## Build
 
@@ -92,13 +92,12 @@ protobuf, or the GUI stack yourself.
 - **macOS**: run `brew install llvm libomp cmake ninja`. Apple Clang does not ship OpenMP, and
   XGBoost needs it. The build looks for Homebrew LLVM automatically if it is there.
 - **Linux**: `clang` (or `gcc`), `cmake`, `ninja`, and the usual build tools.
-- **Windows**: Visual Studio 2022 with "Desktop development with C++". Configure and build from
-  an **x64 Native Tools Command Prompt**.
+- **Windows**: Visual Studio 2022
 
 ### 1. Get the IBKR TWS API (required)
 
 Interactive Brokers does not allow redistributing their API source, so it is **not** included in
-this repo and never has been. You need to download it yourself:
+this repo. You need to download it yourself:
 
 - Official repo: **https://github.com/InteractiveBrokers/tws-api-public**
 - Or through the TWS API download on Interactive Brokers' own site.
@@ -117,7 +116,7 @@ core/twsapi/libbid/    <- the platform decimal-math library from the same SDK
 cmake --preset release && cmake --build --preset release
 ```
 
-Other presets: `debug` (with ASan and UBSan), `linux-release`, `linux-debug`, `windows-release`,
+Other presets: `debug`, `linux-release`, `linux-debug`, `windows-release`,
 `windows-debug`. The first configure step clones and builds every dependency from source, so it
 takes a few minutes.
 
@@ -150,7 +149,6 @@ files, both relative to where the binary sits.
 | **Execution** | IBKR TWS API, bracket orders (entry limit + stop-loss + take-profit) |
 | **UI** | Dear ImGui + ImPlot, optional at compile time |
 | **Build** | CMake + Ninja, all dependencies pinned and built via `FetchContent` |
-| **Mode** | **Paper trading only** |
 
 ### Data and model files
 
