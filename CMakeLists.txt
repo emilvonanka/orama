@@ -30,7 +30,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-option(ORAMA_USE_GUI "Build the ImGui/ImPlot live dashboard (requires OpenGL/GLFW)" ON)
+option(ORAMA_USE_GUI "Use the ImGui dashboard" ON)
 
 file(GLOB SOURCES CONFIGURE_DEPENDS
      "${CMAKE_CURRENT_SOURCE_DIR}/core/*.cpp"
