@@ -1,0 +1,12 @@
+Copyright (c) 2026 Emil Johansson. All rights reserved.
+
+This source code is made available publicly for viewing and reference purposes only.
+No permission is granted to copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of this software, in whole or in part, for any purpose, without
+prior written permission from the copyright holder.
+
+This license applies to Orama's own source code only. It does not cover, and grants no
+rights to, any third-party dependency fetched or referenced during the build (including
+but not limited to XGBoost, TA-Lib, protobuf, GLFW, ImGui, ImPlot, the date/date-tz
+library, or Interactive Brokers' TWS API), each of which remains subject to its own
+respective license.

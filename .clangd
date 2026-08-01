@@ -1,0 +1,79 @@
+# Orama clangd configuration.
+# clangd reads compile_commands.json so it sees the exact flags CMake uses.
+# Point it at the Debug preset's build dir (regenerate with `cmake --preset debug`).
+
+CompileFlags:
+  CompilationDatabase: build/debug
+
+  # Strip flags the Homebrew/Clang driver passes that clangd's bundled
+  # frontend may not recognise, to avoid spurious diagnostics.
+  Remove:
+    - -fno-sanitize-recover=all
+    - -fsanitize=*
+
+Diagnostics:
+  ClangTidy:
+    Add:
+      - modernize-*
+      - performance-*
+      - readability-*
+      - bugprone-*
+      - cppcoreguidelines-*
+
+    Remove:
+      - modernize-use-trailing-return-type
+      - readability-identifier-length
+      - cppcoreguidelines-avoid-magic-numbers
+
+    FastCheckFilter: Strict
+
+  UnusedIncludes: Strict
+  MissingIncludes: Strict
+
+InlayHints:
+  Enabled: Yes
+  ParameterNames: Yes
+  DeducedTypes: Yes
+
+Hover:
+  ShowAKA: Yes
+
+Index:
+  Background: Build
+  StandardLibrary: Yes
+
+---
+# Skip indexing all FetchContent dependencies
+
+If:
+  PathMatch: .*/_deps/.*
+
+Index:
+  Background: Skip
+
+---
+# Skip protobuf sources specifically
+
+If:
+  PathMatch: .*(protobuf|protobuf-src|protobuf-build).*
+
+Index:
+  Background: Skip
+
+---
+# Skip Abseil (protobuf pulls in a lot of it)
+
+If:
+  PathMatch: .*(absl|abseil).*
+
+Index:
+  Background: Skip
+
+---
+# Skip generated protobuf files
+
+If:
+  PathMatch: .*\.pb\.(cc|cpp|h|hpp)$
+
+Index:
+  Background: Skip

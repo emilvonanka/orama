@@ -1,0 +1,52 @@
+# Orama C++ formatting — LLVM base, tuned for a large systems codebase.
+---
+Language: Cpp
+BasedOnStyle: LLVM
+
+# Indentation
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ContinuationIndentWidth: 4
+AccessModifierOffset: -4
+NamespaceIndentation: None
+
+# Line width
+ColumnLimit: 100
+
+# Braces — Attach style, consistent everywhere.
+BreakBeforeBraces: Attach
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortBlocksOnASingleLine: Empty
+InsertBraces: true
+
+# Pointers/refs bind to the type — systems code reads cleaner this way.
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+# Includes — group and sort so clangd/IWYU stay tidy.
+SortIncludes: CaseSensitive
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '^<[^/]+>$'        # C++ standard headers
+    Priority: 1
+  - Regex: '^<.*\.h>$'         # C system headers
+    Priority: 2
+  - Regex: '^<.*>$'            # third-party (fmt, spdlog, ...)
+    Priority: 3
+  - Regex: '^".*"$'            # project headers
+    Priority: 4
+
+# Spacing & alignment
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: false
+AlignTrailingComments: true
+SpaceBeforeParens: ControlStatements
+SpacesInContainerLiterals: false
+Cpp11BracedListStyle: true
+
+# Modern C++
+Standard: c++20
+FixNamespaceComments: true
