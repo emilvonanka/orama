@@ -126,6 +126,17 @@ If you are running headless with no display server, turn the GUI off:
 cmake --preset linux-release -DORAMA_USE_GUI=OFF
 ```
 
+Or change
+```
+option(ORAMA_USE_GUI "Use the ImGui dashboard" ON)
+```
+In CMakeLists.txt
+
+To use training mode, define it in CMakeLists.txt
+```
+add_compile_definitions(TRAIN_MODEL)
+```
+
 ### 3. What it expects at runtime
 
 The binary connects to TWS or IB Gateway on `127.0.0.1:7497` (the default paper trading socket)
