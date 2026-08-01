@@ -6,12 +6,11 @@
 #include <limits>
 #include <optional>
 #include <stdexcept>
-#include <vector>
-
 #include <ta_common.h>
 #include <ta_defs.h>
 #include <ta_func.h>
 #include <ta_libc.h>
+#include <vector>
 
 #include "../logs.hpp"
 #include "../market.hpp"
@@ -139,7 +138,7 @@ void util::ta::init() {
         {TA_MACD_Lookback(12, 26, 9), TA_MAMA_Lookback(mama_fast, mama_slow),
          TA_RSI_Lookback(rsi_period), TA_AROON_Lookback(aroon_period), TA_MFI_Lookback(mfi_period),
          TA_EMA_Lookback(ema_period), TA_BBANDS_Lookback(20, 2.0, 2.0, TA_MAType_SMA)});
-         
+
     if (actual > lookback_period) {
         throw std::runtime_error(
             std::format("lookback_period ({}) too small; TA-Lib needs {} — update the constant",

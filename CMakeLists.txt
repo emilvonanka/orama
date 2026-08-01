@@ -1,5 +1,25 @@
 cmake_minimum_required(VERSION 3.30)
 
+# Clang on apple does not ship OpenMP, which XGBoost needs, so Homebrew LLVM is preferred
+# when it is installed. The prefix is resolved through `brew` rather than hardcoded. If Homebrew
+# LLVM is absent we fall through to the default compiler and let find_package(OpenMP)
+if(APPLE AND NOT CMAKE_CXX_COMPILER AND NOT DEFINED ENV{CXX})
+    find_program(BREW_EXECUTABLE brew)
+    if(BREW_EXECUTABLE)
+        execute_process(
+            COMMAND ${BREW_EXECUTABLE} --prefix llvm
+            OUTPUT_VARIABLE HOMEBREW_LLVM_PREFIX
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
+        )
+        if(HOMEBREW_LLVM_PREFIX AND EXISTS "${HOMEBREW_LLVM_PREFIX}/bin/clang++")
+            set(CMAKE_C_COMPILER   "${HOMEBREW_LLVM_PREFIX}/bin/clang"   CACHE FILEPATH "")
+            set(CMAKE_CXX_COMPILER "${HOMEBREW_LLVM_PREFIX}/bin/clang++" CACHE FILEPATH "")
+            message(STATUS "Using Homebrew LLVM from ${HOMEBREW_LLVM_PREFIX}")
+        endif()
+    endif()
+endif()
+
 project(orama VERSION 0.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)

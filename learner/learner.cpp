@@ -25,9 +25,12 @@
 #include "../core/util/ta.hpp"
 #include "../model/model.hpp"
 
-// @TODO: dont short for now, its borrowing costs! just go long
+// @TODO: long-only for now. shorting adds borrow costs that aren't modelled here.
 
 static constexpr double price_scale = 1e-9;
+
+// Boosting rounds per batch
+static constexpr int training_rounds = 2952;
 
 void learner::start(std::unique_ptr<model>& orama) {
     const auto now = std::chrono::system_clock::now();
@@ -91,12 +94,11 @@ void learner::start(std::unique_ptr<model>& orama) {
         LOG_INFO(std::format("batch class distribution — hold={} buy={} sell={}", counts[0],
                              counts[1], counts[2]));
 
-        //@NOTE: 2806 rounds was found to be optimal for early stopping with the validation set, see
-        // model::learn() for details
-
-        // 2806 for 0.35%
-        // 2952 for 0.25%
-        orama->learn(std::move(inputs), 2952);
+        // Round count comes from the early-stopping search in model::learn(std::vector<input>),
+        // which holds out the last 20% of each batch as a temporal validation split. Re-run
+        // that overload after changing the feature set or the labelling thresholds, then set
+        // this to the best_round it reports.
+        orama->learn(std::move(inputs), training_rounds);
     }
 
     orama->save();

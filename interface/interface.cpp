@@ -4,14 +4,13 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
-#include <iterator>
-#include <limits>
-#include <optional>
-
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <implot.h>
+#include <iterator>
+#include <limits>
+#include <optional>
 
 #include "../core/util/ta.hpp"
 
@@ -32,7 +31,6 @@ constexpr ImVec4 bull_color{0.20F, 0.75F, 0.35F, 1.0F};
 constexpr ImVec4 bear_color{0.85F, 0.25F, 0.25F, 1.0F};
 constexpr ImVec4 highlight_color{1.0F, 0.85F, 0.2F, 1.0F};
 
-
 struct chart_overlay {
     std::optional<double> stop_price;
     std::optional<double> take_price;
@@ -44,7 +42,7 @@ double as_double(std::optional<float> v) {
 }
 
 void draw_candles(const std::vector<market::interval>& bars, const chart_overlay& overlay,
-                   double half_width) {
+                  double half_width) {
     ImDrawList* draw_list = ImPlot::GetPlotDrawList();
     for (size_t i = 0; i < bars.size(); ++i) {
         const auto& bar = bars[i];
@@ -68,7 +66,7 @@ void draw_candles(const std::vector<market::interval>& bars, const chart_overlay
 }
 
 void plot_price_and_technicals(const char* id, const std::vector<market::interval>& bars,
-                                const chart_overlay& overlay = {}) {
+                               const chart_overlay& overlay = {}) {
     if (bars.size() < 2) {
         ImGui::TextDisabled("warming up...");
         return;
@@ -103,8 +101,7 @@ void plot_price_and_technicals(const char* id, const std::vector<market::interva
         rsi[i] = as_double(bar.technicals[util::ta::idx(market::indicators::rsi)]);
         macd[i] = as_double(bar.technicals[util::ta::idx(market::indicators::macd)]);
         macd_signal[i] = as_double(bar.technicals[util::ta::idx(market::indicators::macd_signal)]);
-        macd_hist[i] =
-            as_double(bar.technicals[util::ta::idx(market::indicators::macd_histogram)]);
+        macd_hist[i] = as_double(bar.technicals[util::ta::idx(market::indicators::macd_histogram)]);
         mfi[i] = as_double(bar.technicals[util::ta::idx(market::indicators::mfi)]);
         aroon_up[i] = as_double(bar.technicals[util::ta::idx(market::indicators::aroon_up)]);
         aroon_down[i] = as_double(bar.technicals[util::ta::idx(market::indicators::aroon_down)]);
@@ -141,17 +138,15 @@ void plot_price_and_technicals(const char* id, const std::vector<market::interva
 
             if (overlay.take_price) {
                 double v = *overlay.take_price;
-                ImPlot::PlotInfLines(
-                    "Take Profit", &v, 1,
-                    ImPlotSpec(ImPlotProp_Flags, ImPlotInfLinesFlags_Horizontal,
-                               ImPlotProp_LineColor, bull_color));
+                ImPlot::PlotInfLines("Take Profit", &v, 1,
+                                     ImPlotSpec(ImPlotProp_Flags, ImPlotInfLinesFlags_Horizontal,
+                                                ImPlotProp_LineColor, bull_color));
             }
             if (overlay.stop_price) {
                 double v = *overlay.stop_price;
-                ImPlot::PlotInfLines(
-                    "Stop Loss", &v, 1,
-                    ImPlotSpec(ImPlotProp_Flags, ImPlotInfLinesFlags_Horizontal,
-                               ImPlotProp_LineColor, bear_color));
+                ImPlot::PlotInfLines("Stop Loss", &v, 1,
+                                     ImPlotSpec(ImPlotProp_Flags, ImPlotInfLinesFlags_Horizontal,
+                                                ImPlotProp_LineColor, bear_color));
             }
             ImPlot::EndPlot();
         }
@@ -166,7 +161,7 @@ void plot_price_and_technicals(const char* id, const std::vector<market::interva
             ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Time);
             ImPlot::SetupAxisLimits(ImAxis_X1, x_min, x_max, ImPlotCond_Once);
             ImPlot::PlotBars("Histogram", xs.data(), macd_hist.data(), static_cast<int>(n),
-                              spacing * 0.7);
+                             spacing * 0.7);
             ImPlot::PlotLine("MACD", xs.data(), macd.data(), static_cast<int>(n));
             ImPlot::PlotLine("Signal", xs.data(), macd_signal.data(), static_cast<int>(n));
             ImPlot::EndPlot();
@@ -191,13 +186,12 @@ void plot_price_and_technicals(const char* id, const std::vector<market::interva
 }
 
 std::optional<size_t> find_entry_bar(const std::vector<market::interval>& bars,
-                                      std::chrono::system_clock::time_point entry_time) {
+                                     std::chrono::system_clock::time_point entry_time) {
     if (bars.empty()) {
         return std::nullopt;
     }
     int64_t entry_ns =
-        std::chrono::duration_cast<std::chrono::nanoseconds>(entry_time.time_since_epoch())
-            .count();
+        std::chrono::duration_cast<std::chrono::nanoseconds>(entry_time.time_since_epoch()).count();
     size_t best = 0;
     int64_t best_diff = std::abs(bars[0].ts_ns - entry_ns);
     for (size_t i = 1; i < bars.size(); ++i) {
@@ -226,7 +220,6 @@ interface::interface() {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImPlot::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
     ImGui_ImplGlfw_InitForOpenGL(window_, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 }
@@ -261,9 +254,8 @@ void interface::refresh_snapshot() {
     // drop history for symbols no longer targeted, so the map doesn't grow unbounded as targets
     // rotate in and out.
     for (auto it = prob_history_.begin(); it != prob_history_.end();) {
-        bool still_targeted = std::any_of(targets_.begin(), targets_.end(), [&](const auto& t) {
-            return t.symbol == it->first;
-        });
+        bool still_targeted = std::any_of(targets_.begin(), targets_.end(),
+                                          [&](const auto& t) { return t.symbol == it->first; });
         it = still_targeted ? std::next(it) : prob_history_.erase(it);
     }
 
@@ -299,9 +291,8 @@ void interface::render() {
 
         ImGui::Text("%s  conf=%.2f  action=%s", t.symbol.c_str(), static_cast<double>(t.confidence),
                     to_string(t.last_action));
-        ImGui::Text("  probs: hold=%.2f buy=%.2f sell=%.2f",
-                    static_cast<double>(t.action_probs[0]), static_cast<double>(t.action_probs[1]),
-                    static_cast<double>(t.action_probs[2]));
+        ImGui::Text("  probs: hold=%.2f buy=%.2f sell=%.2f", static_cast<double>(t.action_probs[0]),
+                    static_cast<double>(t.action_probs[1]), static_cast<double>(t.action_probs[2]));
 
         if (auto it = prob_history_.find(t.symbol);
             it != prob_history_.end() && it->second.size() > 1) {
@@ -311,11 +302,10 @@ void interface::render() {
             std::vector<double> buy(history.size());
             std::vector<double> sell(history.size());
             for (size_t i = 0; i < history.size(); ++i) {
-                xs[i] = static_cast<double>(
-                             std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                 history[i].ts.time_since_epoch())
-                                 .count()) /
-                         1e9;
+                xs[i] = static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(
+                                                history[i].ts.time_since_epoch())
+                                                .count()) /
+                        1e9;
                 hold[i] = static_cast<double>(history[i].probs[0]);
                 buy[i] = static_cast<double>(history[i].probs[1]);
                 sell[i] = static_cast<double>(history[i].probs[2]);

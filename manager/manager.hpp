@@ -33,8 +33,7 @@ public:
         }
         std::string symbol;
         std::chrono::system_clock::time_point entry_time; // when we started targeting this equity
-        std::vector<market::interval>
-            window;
+        std::vector<market::interval> window;
         std::chrono::system_clock::time_point
             last_updated; // when we last got a new bar for this equity
         int req_id = -1;  // the request id for the live bars subscription, so we can unsubscribe
@@ -56,8 +55,7 @@ public:
         int req_id = -1; // real-time bars subscription; -1 = not yet subscribed
         pos_state state = pos_state::open;
         std::chrono::system_clock::time_point close_requested{}; // set when state -> closing
-        std::vector<market::interval>
-            window;
+        std::vector<market::interval> window;
         std::chrono::system_clock::time_point
             last_updated;            // when we last predicted (throttle, not last bar received)
         float confidence = 0.0F;     // model confidence at entry, for the UI
@@ -98,12 +96,12 @@ public:
         size_t requested_qty;
         int stop_id;
         int take_id;
-        double entry_price = 0.0;                     
+        double entry_price = 0.0;
         std::chrono::system_clock::time_point created;
-        std::vector<market::interval> seed_window;     // target window snapshot, applied on fill
-        float confidence = 0.0F; // model confidence at decision time, for the UI
-        double stop_price = 0.0; // for the UI
-        double take_price = 0.0; // for the UI
+        std::vector<market::interval> seed_window; // target window snapshot, applied on fill
+        float confidence = 0.0F;                   // model confidence at decision time, for the UI
+        double stop_price = 0.0;                   // for the UI
+        double take_price = 0.0;                   // for the UI
     };
 
     struct entry_candidate {
@@ -188,9 +186,8 @@ private:
 
     void resubscribe_all();
 
-
     bool entries_allowed();
-  
+
     [[nodiscard]] double committed_usd_locked() const;
 
     void expire_pending_orders();

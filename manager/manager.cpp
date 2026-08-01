@@ -104,9 +104,9 @@ void manager::initialize(size_t max_target_count, std::chrono::minutes target_tr
             pos.entry_time = std::chrono::system_clock::now(); // this will do for now
             pos.entry_price = p.avg_cost;
             pos.quantity = static_cast<size_t>(p.quantity);
-          
+
             auto hist = me_->historical(p.symbol, restore_bars);
-       
+
             std::erase_if(hist, [](const market::interval& b) {
                 const auto dt = b.datetime;
                 const bool before_open = dt.hour < 9 || (dt.hour == 9 && dt.minute < 30);
@@ -124,7 +124,7 @@ void manager::initialize(size_t max_target_count, std::chrono::minutes target_tr
     for (size_t i = 0; i < max_target_count_; ++i) {
         target t;
         update_target(&t);
-    
+
         t.last_updated = std::chrono::system_clock::now() - std::chrono::seconds(10) +
                          std::chrono::milliseconds(i * 10'000 / max_target_count_);
         targets_.push_back(std::move(t));
@@ -511,7 +511,6 @@ void manager::update_target(target* t) {
     }
 }
 
-
 void manager::make_position(entry_candidate&& cand) {
     constexpr size_t max_open_positions = 3;
     constexpr double max_drawdown = 0.015; // 1.5% stop loss
@@ -691,7 +690,7 @@ bool manager::entries_allowed() {
         day_start_equity_ = equity;
         halted_logged_ = false;
     }
-  
+
     if (day_start_equity_ <= 0.0 && equity > 0.0) {
         day_start_equity_ = equity;
     }

@@ -62,7 +62,7 @@ int main(int /*argc*/, char* argv[]) {
     const std::vector<std::pair<std::string, std::string>> params = {
         // --- Core ---
         {"tree_method", "hist"},
-        {"device", "cpu"}, // "cuda" if training on the 3060
+        {"device", "cpu"}, // set to "cuda" to train on a CUDA-capable GPU
         {"objective", "multi:softprob"},
         {"num_class", "3"},
         {"eval_metric", "mlogloss"},

@@ -125,19 +125,12 @@ public:
             if (!xgb_ok(XGBoosterUpdateOneIter(booster_, i, dtrain), "learn: update")) {
                 break;
             }
-
-            // if (i % 50 == 0 || i == rounds - 1) { // useless, we have early stopping now
-            //  const char* eval_str = nullptr;
-            //   XGBoosterEvalOneIter(booster_, i, &dtrain, (const char*[]){"train"}, 1, &eval_str);
-            //  LOG_INFO(std::format("round {} | {}", i, eval_str));
-            //}
         }
 
         const auto duration3 = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - now3);
         LOG_INFO(std::format("learn: trained {} rounds in {} ms", rounds, duration3.count()));
 
-        //  XGBoosterSaveModel(booster_, file_path_.c_str());
         XGDMatrixFree(dtrain);
 
         const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -223,7 +216,6 @@ public:
 
             // parse val-mlogloss from "[i]\ttrain-mlogloss:X\tval-mlogloss:Y"
             double val_loss = parse_val_loss(eval_str);
-            //  LOG_INFO(std::format("round {} | {}", i, eval_str));
 
             if (val_loss < best_val_loss - 1e-5) {
                 best_val_loss = val_loss;

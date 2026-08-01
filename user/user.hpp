@@ -23,7 +23,6 @@ public:
         return ibkr_->get_positions();
     }
 
-
     int cancel_open_orders(const std::string& symbol) {
         return ibkr_->cancel_open_orders(symbol);
     }

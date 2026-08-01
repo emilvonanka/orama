@@ -19,15 +19,11 @@
       "name": "macos-llvm",
       "hidden": true,
       "inherits": "base",
-      "description": "Homebrew LLVM Clang on Apple Silicon. The development toolchain.",
+      "description": "macOS. CMakeLists.txt prefers Homebrew LLVM (resolved via `brew --prefix llvm`, and falls back to the default compiler; override with -DCMAKE_CXX_COMPILER or CC/CXX.",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
         "rhs": "Darwin"
-      },
-      "cacheVariables": {
-        "CMAKE_C_COMPILER": "/opt/homebrew/opt/llvm/bin/clang",
-        "CMAKE_CXX_COMPILER": "/opt/homebrew/opt/llvm/bin/clang++"
       }
     },
     {

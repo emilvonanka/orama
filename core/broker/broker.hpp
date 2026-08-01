@@ -102,7 +102,7 @@ private:
     static market::interval bar_to_interval(const Bar& bar);
 
     static int64_t ibkr_time_to_ns(const std::string& t);
-   
+
     static bool sanitize_interval(market::interval& iv);
 
     static double round_to_tick(double price);
@@ -110,19 +110,18 @@ private:
     int alloc_req_id() {
         return next_req_id_.fetch_add(1);
     }
-   
+
     int alloc_order_id() {
         if (next_order_id_.load() < 0) {
             return -1;
         }
         return next_order_id_.fetch_add(1);
     }
-    
+
     [[nodiscard]] order_cb_t order_callback() const {
         std::lock_guard<std::mutex> lk(order_cb_mtx_);
         return order_cb_;
     }
-
 
     struct pending_hist {
         std::mutex mtx;
@@ -142,7 +141,6 @@ private:
         std::condition_variable cv;
         bool done{false};
     };
-
 
     EReaderOSSignal signal_;
     std::unique_ptr<EClientSocket> client_;
@@ -169,7 +167,6 @@ private:
     static constexpr int req_id_base = 1'000'000;
     std::atomic<int> next_req_id_{req_id_base};
 
-
     mutable std::mutex live_orders_mtx_;
     std::unordered_map<int, std::string> live_orders_;
 
@@ -184,7 +181,6 @@ private:
     std::unordered_map<std::string, fx_entry> fx_cache_;
     static constexpr std::chrono::seconds fx_ttl{60};
 
-  
     mutable std::mutex order_cb_mtx_;
     order_cb_t order_cb_;
 
