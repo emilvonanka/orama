@@ -1,37 +1,43 @@
 # Orama
 
-A single-binary C++23 trading system that ingests 1-minute NASDAQ-100 bars, computes technical features, runs XGBoost inference, and executes bracket orders against Interactive Brokers' paper-trading API. With a real-time ImGui/ImPlot dashboard attached to the live process.
+I built Orama to see if I could take a trading idea all the way from a data pipeline to a
+live-connected system, not just a backtest in a notebook. It is a single C++23 binary that reads
+1-minute NASDAQ-100 bars, builds features from them, runs those features through an XGBoost
+model, and sends bracket orders to Interactive Brokers' paper trading API. It also has a live
+dashboard built with ImGui and ImPlot so I can actually watch what it is doing while it runs.
 
-> **Paper trading only.** This is an engineering project, not an investment product. See [Disclaimer](#disclaimer).
+> **Paper trading only.** This is a systems engineering project, not a pitch for a trading
+> strategy. See the [Disclaimer](#disclaimer) at the bottom.
 
 ---
 
 ## Screenshots
 
-> **TODO — add dashboard screenshots here.**
+> **TODO, add dashboard screenshots here.**
 >
-> No images are committed to this repository yet. To add them:
-> 1. Run the binary with the GUI enabled (the default build).
-> 2. Capture the **Targets**, **Positions**, and **Session Stats** windows, plus the
->    price/RSI/MACD ImPlot panes.
-> 3. Save them under `docs/images/` and replace this block with:
+> I have not committed any images yet. To add them:
+> 1. Run the binary with the GUI turned on (this is the default build).
+> 2. Take screenshots of the Targets, Positions, and Session Stats windows, plus the
+>    price/RSI/MACD panes.
+> 3. Save them under `docs/images/` and swap this section for:
 >    ```markdown
 >    ![Orama dashboard](docs/images/dashboard.png)
 >    ```
 >
-> `docs/` is not gitignored, so committed screenshots will be picked up normally.
+> `docs/` is not gitignored, so committed screenshots will show up normally.
 
-The dashboard renders in the same process as the trading loop and exposes: live candles with
-indicator overlays, per-symbol model action probabilities, tracked targets, entry candidates,
-working orders, open positions, and session counters.
+The dashboard runs in the same process as the trading loop. It shows live candles with
+indicator overlays, model probabilities per symbol, tracked targets, entry candidates, working
+orders, open positions, and a few session counters.
 
 ---
 
 ## Architecture
 
-Orama is one process and one binary. Market data flows in from two different sources depending
-on mode, recorded DBN files during training, the broker's live feed during execution. Through
-a shared feature pipeline into the same model code, so training and inference cannot drift apart.
+Orama is one process and one binary. Market data comes in from two places depending on the
+mode. Recorded DBN files during training, and the broker's live feed during execution. Both
+paths go through the same feature pipeline and the same model code, so training and inference
+can't drift apart from each other.
 
 ```mermaid
 flowchart TD
@@ -68,36 +74,36 @@ flowchart TD
 | Path | Responsibility |
 |---|---|
 | `core/` | Entry point, logging, market types, TA-Lib wrapper, runtime config |
-| `core/broker/` | IBKR TWS API client — connection, subscriptions, order placement, callbacks |
-| `learner/` | Offline training: reads Databento DBN files, builds labelled feature vectors |
-| `model/` | XGBoost booster lifecycle — train, early stopping, save/load, predict |
-| `manager/` | Live orchestration: target selection, inference, risk limits, order state machine |
-| `user/` | Account abstraction — sizing, FX conversion, order helpers |
-| `interface/` | ImGui/ImPlot dashboard, reading a mutex-guarded snapshot of manager state |
+| `core/broker/` | IBKR TWS API client, connection, subscriptions, order placement, callbacks |
+| `learner/` | Offline training, reads Databento DBN files, builds labelled feature vectors |
+| `model/` | XGBoost booster lifecycle, train, early stopping, save/load, predict |
+| `manager/` | Live orchestration, target selection, inference, risk limits, order state machine |
+| `user/` | Account abstraction, sizing, FX conversion, order helpers |
+| `interface/` | ImGui/ImPlot dashboard, reads a mutex-guarded snapshot of manager state |
 
 ## Build
 
 ### Prerequisites
 
-Dependencies are fetched and built by CMake, you do not need to install XGBoost, TA-Lib,
+CMake fetches and builds all the dependencies. You do not need to install XGBoost, TA-Lib,
 protobuf, or the GUI stack yourself.
 
-- **CMake ≥ 3.30** and **Ninja**
-- **macOS**: `brew install llvm libomp cmake ninja`. Apple Clang does not ship OpenMP, which
-  XGBoost requires. The build prefers Homebrew LLVM automatically when present.
-- **Linux**: `clang` (or `gcc`), `cmake`, `ninja`, and standard build tooling.
+- **CMake 3.30 or newer** and **Ninja**
+- **macOS**: run `brew install llvm libomp cmake ninja`. Apple Clang does not ship OpenMP, and
+  XGBoost needs it. The build looks for Homebrew LLVM automatically if it is there.
+- **Linux**: `clang` (or `gcc`), `cmake`, `ninja`, and the usual build tools.
 - **Windows**: Visual Studio 2022 with "Desktop development with C++". Configure and build from
   an **x64 Native Tools Command Prompt**.
 
-### 1. Obtain the IBKR TWS API (required)
+### 1. Get the IBKR TWS API (required)
 
-Interactive Brokers' license does not permit redistributing their API source, so it is **not**
-included in this repository and never has been. Download it separately:
+Interactive Brokers does not allow redistributing their API source, so it is **not** included in
+this repo and never has been. You need to download it yourself:
 
-- Official public repository: **https://github.com/InteractiveBrokers/tws-api-public**
-- (Or the TWS API download on Interactive Brokers' own API software page.)
+- Official repo: **https://github.com/InteractiveBrokers/tws-api-public**
+- Or through the TWS API download on Interactive Brokers' own site.
 
-Place the files so the build can find them:
+Put the files here so the build can find them:
 
 ```
 core/twsapi/           <- contents of  source/cppclient/client/  from the SDK
@@ -111,81 +117,80 @@ core/twsapi/libbid/    <- the platform decimal-math library from the same SDK
 cmake --preset release && cmake --build --preset release
 ```
 
-Other presets: `debug` (ASan + UBSan), `linux-release`, `linux-debug`, `windows-release`,
-`windows-debug`. The first configure clones and builds every dependency from source and takes
-several minutes.
+Other presets: `debug` (with ASan and UBSan), `linux-release`, `linux-debug`, `windows-release`,
+`windows-debug`. The first configure step clones and builds every dependency from source, so it
+takes a few minutes.
 
-Headless deployments (no display server) should disable the GUI:
+If you are running headless with no display server, turn the GUI off:
 
 ```bash
 cmake --preset linux-release -DORAMA_USE_GUI=OFF
 ```
 
-### 3. Runtime expectations
+### 3. What it expects at runtime
 
-The binary connects to TWS/IB Gateway on `127.0.0.1:7497` (the default paper-trading socket)
-with client id 1. Enable API access in TWS under **Settings → API → Settings**, and make sure
-the socket port there matches.
+The binary connects to TWS or IB Gateway on `127.0.0.1:7497` (the default paper trading socket)
+with client id 1. Enable API access in TWS under **Settings → API → Settings** and make sure the
+port there matches.
 
-It expects `gen/` (model artifacts) and, for training, `raw_data/` (DBN files) relative to its
-own location.
+It expects a `gen/` folder for model artifacts, and for training, a `raw_data/` folder for DBN
+files, both relative to where the binary sits.
 
 ---
 
 ## Technical summary
 
-| |                                                                                                                               |
-|---|-------------------------------------------------------------------------------------------------------------------------------|
-| **Language** | C++23                                                                                                                         |
-| **Architecture** | Single statically-linked binary. no runtime service dependencies                                                              |
-| **Model** | XGBoost, `multi:softprob`, 3 classes (hold / buy / sell)                                                                      |
-| **Features** | Per-bar OHLCV deltas plus TA-Lib indicators over a rolling 15-bar window                                                      |
-| **Data** | 1-minute NASDAQ-100 OHLCV bars (Databento DBN for training, IBKR for live)                                                    |
-| **Execution** | IBKR TWS API, bracket orders (entry limit + stop-loss + take-profit)                                                          |
-| **UI** | Dear ImGui + ImPlot, optional at compile time                                                       |
-| **Build** | CMake + Ninja, all dependencies pinned and built via `FetchContent`                                                           |
-| **Mode** | **Paper trading only**                                                                                                        |
+| | |
+|---|---|
+| **Language** | C++23 |
+| **Architecture** | One statically linked binary, no runtime service dependencies |
+| **Model** | XGBoost, `multi:softprob`, 3 classes (hold / buy / sell) |
+| **Features** | Per-bar OHLCV deltas plus TA-Lib indicators over a rolling 15-bar window |
+| **Data** | 1-minute NASDAQ-100 OHLCV bars (Databento DBN for training, IBKR for live) |
+| **Execution** | IBKR TWS API, bracket orders (entry limit + stop-loss + take-profit) |
+| **UI** | Dear ImGui + ImPlot, optional at compile time |
+| **Build** | CMake + Ninja, all dependencies pinned and built via `FetchContent` |
+| **Mode** | **Paper trading only** |
 
-### Data and model artifacts
+### Data and model files
 
-Neither the training data nor the trained model is committed:
+I do not commit the training data or the trained model.
 
-- **Market data** (`raw_data/`) is licensed from a data vendor to the account holder and may not
-  be redistributed. The ingestion and training code is included, so the pipeline is reproducible
-  by anyone with their own data licence.
-- **Trained weights** (`gen/`) are a large build output, regenerated by the training pipeline
-  rather than version-controlled.
+- **Market data** (`raw_data/`) is licensed from a data vendor to my account, and I am not
+  allowed to redistribute it. The code that reads and trains on it is all here though, so anyone
+  with their own data licence can reproduce the pipeline.
+- **Trained weights** (`gen/`) are a build output rather than something I version control. You
+  regenerate them by running the training pipeline yourself.
 
 ### Known limitations
 
-- The IBKR dependency is compiled directly into `manager`/`user` rather than sitting behind a
-  broker interface, so the project cannot currently be built or tested without the TWS API SDK.
-  This is the most significant piece of technical debt in the codebase.
-- There is no automated test suite. Correctness currently rests on sanitizer-enabled debug
-  builds, static analysis, and manual paper-trading observation.
-- Windows support is implemented but has not been verified end-to-end on hardware. Development
-  is on macOS and deployment on Linux.
+- The IBKR dependency is compiled directly into `manager` and `user` instead of sitting behind a
+  proper broker interface. That means the project cannot currently be built or tested without
+  the TWS API SDK. This is the biggest piece of technical debt in the codebase right now.
+- There is no automated test suite yet. Correctness currently relies on sanitizer-enabled debug
+  builds, static analysis, and watching it paper trade.
+- Windows support is implemented but I have not verified it end to end on real hardware.
+  Development happens on macOS and deployment on Linux.
 
 ---
 
 ## Disclaimer
 
-This project is published for **educational and portfolio purposes**.
+I am publishing this for educational and portfolio purposes.
 
-- It is configured for **paper trading only** and is not intended for live trading with real
-  capital.
+- It is set up for **paper trading only**. It is not meant for live trading with real capital.
 - Nothing here is investment advice, a solicitation, or a recommendation to trade any security.
-- **No claim is made about profitability.** No performance figures, returns, or strategy
-  results are published in this repository, and none should be inferred from its existence.
-- Algorithmic trading carries substantial risk of loss. Anyone adapting this code does so
-  entirely at their own risk, and is responsible for their own compliance with their broker's
-  and data vendor's terms.
-- Not affiliated with, endorsed by, or connected to Interactive Brokers or any data vendor.
+- **I am not claiming this is profitable.** I have not published any performance figures,
+  returns, or strategy results in this repository, and none should be assumed just because the
+  project exists.
+- Algorithmic trading can lose real money. If you adapt this code, that is entirely on you, and
+  you are responsible for following your own broker's and data vendor's terms.
+- I am not affiliated with, endorsed by, or connected to Interactive Brokers or any data vendor.
 
 ## License
 
 [MIT](LICENSE) © 2026 Emil Johansson.
 
-Covers Orama's own source only. Third-party dependencies fetched during the build remain under
-their own licenses, and Interactive Brokers' TWS API — not redistributed here — remains subject
-to IBKR's terms.
+This covers Orama's own source code only. Third-party dependencies fetched during the build stay
+under their own licenses, and Interactive Brokers' TWS API, not redistributed here, stays subject
+to IBKR's own terms.
