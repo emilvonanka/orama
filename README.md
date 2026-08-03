@@ -14,17 +14,6 @@ watch what it is doing while it runs.
 ## Screenshots
 
 > **TODO, add dashboard screenshots here.**
->
-> I have not committed any images yet. To add them:
-> 1. Run the binary with the GUI turned on (this is the default build).
-> 2. Take screenshots of the Targets, Positions, and Session Stats windows, plus the
->    price/RSI/MACD panes.
-> 3. Save them under `docs/images/` and swap this section for:
->    ```markdown
->    ![Orama dashboard](docs/images/dashboard.png)
->    ```
->
-> `docs/` is not gitignored, so committed screenshots will show up normally.
 
 The dashboard runs in the same process as the trading loop. It shows live candles with
 indicator overlays, model probabilities per symbol, tracked targets, entry candidates, working
