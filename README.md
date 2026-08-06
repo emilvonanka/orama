@@ -4,7 +4,7 @@ I built Orama to see if I could take a trading idea all the way to a live-connec
 is a single C++23 binary that reads 1-minute NASDAQ-100 bars, builds features from them, 
 runs those features through an XGBoost model, and sends bracket orders to Interactive Broker's 
 paper trading API. It also has a live dashboard built with ImGui and ImPlot so I can actually 
-watch what it is doing while it runs.
+watch what it is doing while it runs. It automatically places stop losses and take profit at a calculated level.
 
 > **Paper trading only.** This is a systems engineering project, not a profitable trading
 > strategy.
@@ -13,7 +13,8 @@ watch what it is doing while it runs.
 
 ## Screenshots
 
-> **TODO, add dashboard screenshots here.**
+<img width="2560" height="1440" alt="screensht" src="https://github.com/user-attachments/assets/6cfde144-6571-409a-b8ed-c185cff17daf" />
+
 
 The dashboard runs in the same process as the trading loop. It shows live candles with
 indicator overlays, model probabilities per symbol, tracked targets, entry candidates, working
